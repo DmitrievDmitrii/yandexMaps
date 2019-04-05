@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using ApiTests.Constants;
 using ApiTests.Enums;
+using RestSharp;
 using Type = ApiTests.Enums.Type;
 
 namespace ApiTests
@@ -12,12 +13,14 @@ namespace ApiTests
     public class YandexMapsApi
     {
         private RequestSpecification requestSpecification =
-            new RequestSpecification().SetBaseUri("https://search-maps.yandex.ru/v1/");
+            new RequestSpecification().SetBaseUri(ApiUrl);
 
         private ResponseSpecification responseSpecification =
-            new ResponseSpecification().ExpectResponseTime(TimeSpan.FromSeconds(2)).ExpectStatusCode(HttpStatusCode.OK);
+            new ResponseSpecification().ExpectResponseTime(TimeSpan.FromSeconds(1)).ExpectStatusCode(HttpStatusCode.OK);
 
         public const string Key = "1bd24c37-57ae-4f2e-b9d6-4d860dd9f4ad";
+
+        public const string ApiUrl = "https://search-maps.yandex.ru/v1/";
 
         private Uri uri;
 
@@ -38,7 +41,6 @@ namespace ApiTests
 
             using (HttpClient client = this.requestSpecification.GetClient())
             {
-                //var requestUri = new Uri(client.BaseAddress, $"?{content}");
                 var stopWatch = Stopwatch.StartNew();
                 response = client.GetAsync($"?{content}").Result;
                 responseTime = stopWatch.Elapsed;
@@ -138,6 +140,17 @@ namespace ApiTests
             {
                 this.mapsApi.responseSpecification = specification;
                 return this;
+            }
+
+            public RestRequest GetRequest()
+            {
+                var request = new RestRequest();
+                foreach (var parameter in this.mapsApi.parameters)
+                {
+                    request.AddQueryParameter(parameter.Key, parameter.Value);
+                }
+
+                return request;
             }
         }
     }
